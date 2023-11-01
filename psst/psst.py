@@ -23,45 +23,51 @@ def secrets():
     pass
 
 @secrets.command("generate")
-@click.option('-cm', '--cloud-manager', 
-              default=False, 
-              help="Set Cloud Manager Mode for passwords and length requirements", 
+@click.option('-cm', '--cloud-manager',
+              default=False,
+              help="Set Cloud Manager Mode for passwords and length requirements",
               is_flag=True)
-@click.option('-oci', '--oci-image', 
-              default=False, 
-              help="Create JSON for OCI-based PeopleSoft Images", 
+@click.option('-oci', '--oci-image',
+              default=False,
+              help="Create JSON for OCI-based PeopleSoft Images",
               is_flag=True)
-def generate(cloud_manager, oci_image):
+@click.option('-p', '--prefix',
+              default="",
+              show_default=False,
+              help="TODO")
+def generate(cloud_manager, oci_image, prefix):
+    if prefix:
+       prefix = prefix + "_"
+
     """Generate a dictionary of secrets"""
     dict = {}
 
-    dict["db_user_pwd"] = psst.secrets.db_user_pwd.generate(cloud_manager)
-    dict["access_pwd"] = psst.secrets.access_pwd.generate(cloud_manager)
-    dict["es_admin_pwd"] = psst.secrets.es_admin_pwd.generate()
-    dict["es_proxy_pwd"] = psst.secrets.es_proxy_pwd.generate()
-    dict["wls_admin_user_pwd"] = psst.secrets.wls_admin_user_pwd.generate()
+    dict[prefix + "db_user_pwd"] = psst.secrets.db_user_pwd.generate(cloud_manager)
+    dict[prefix + "access_pwd"] = psst.secrets.access_pwd.generate(cloud_manager)
+    dict[prefix + "es_admin_pwd"] = psst.secrets.es_admin_pwd.generate()
+    dict[prefix + "es_proxy_pwd"] = psst.secrets.es_proxy_pwd.generate()
+    dict[prefix + "wls_admin_user_pwd"] = psst.secrets.wls_admin_user_pwd.generate()
     if cloud_manager or oci_image:
-        dict["db_admin_pwd"] = psst.secrets.db_admin_pwd.generate()
-    dict["db_connect_pwd"] = psst.secrets.db_connect_pwd.generate()
-    dict["pia_gateway_admin_pwd"] = psst.secrets.pia_gateway_admin_pwd.generate()
-    dict["pia_webprofile_user_pwd"] = psst.secrets.pia_webprofile_user_pwd.generate()
-    dict["domain_conn_pwd"] = psst.secrets.domain_conn_pwd.generate()
-    dict["pskey_password"] = psst.secrets.pskey_password.generate()
+        dict[prefix + "db_admin_pwd"] = psst.secrets.db_admin_pwd.generate()
+    dict[prefix + "db_connect_pwd"] = psst.secrets.db_connect_pwd.generate()
+    dict[prefix + "pia_gateway_admin_pwd"] = psst.secrets.pia_gateway_admin_pwd.generate()
+    dict[prefix + "pia_webprofile_user_pwd"] = psst.secrets.pia_webprofile_user_pwd.generate()
+    dict[prefix + "domain_conn_pwd"] = psst.secrets.domain_conn_pwd.generate()
+    dict[prefix + "pskey_password"] = psst.secrets.pskey_password.generate()
     if cloud_manager:
-        dict["windows_password"] = psst.secrets.windows_pwd.generate()
+        dict[prefix + "windows_password"] = psst.secrets.windows_pwd.generate()
 
     if oci_image:
         ocidict = {}
-        ocidict["connect_pwd"] = dict["db_connect_pwd"]
-        ocidict["access_pwd"] = dict["access_pwd"]
-        ocidict["admin_pwd"] = dict["db_admin_pwd"]
-        ocidict["weblogic_admin_pwd"] = dict["wls_admin_user_pwd"]
-        ocidict["webprofile_user_pwd"] = dict["pia_webprofile_user_pwd"]
-        ocidict["gw_user_pwd"] = dict["pia_gateway_admin_pwd"]
-        ocidict["domain_conn_pwd"] = dict["domain_conn_pwd"]
-        ocidict["opr_pwd"] = dict["db_user_pwd"]
+        ocidict[prefix + "connect_pwd"] = dict[prefix + "db_connect_pwd"]
+        ocidict[prefix + "access_pwd"] = dict[prefix + "access_pwd"]
+        ocidict[prefix + "admin_pwd"] = dict[prefix + "db_admin_pwd"]
+        ocidict[prefix + "weblogic_admin_pwd"] = dict[prefix + "wls_admin_user_pwd"]
+        ocidict[prefix + "webprofile_user_pwd"] = dict[prefix + "pia_webprofile_user_pwd"]
+        ocidict[prefix + "gw_user_pwd"] = dict[prefix + "pia_gateway_admin_pwd"]
+        ocidict[prefix + "domain_conn_pwd"] = dict[prefix + "domain_conn_pwd"]
+        ocidict[prefix + "opr_pwd"] = dict[prefix + "db_user_pwd"]
         dict = ocidict
-
 
     click.echo(json.dumps(dict, indent=4))
 
